@@ -1,64 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flux Image Generator</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input { width: 300px; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
-    #status { margin-top: 20px; font-style: italic; }
-    img { margin-top: 20px; max-width: 90%; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flux Image Generator</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+  input { width: 300px; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+  button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; }
+  button:disabled { background-color: #ccc; cursor: not-allowed; }
+  #status { margin-top: 20px; font-style: italic; }
+  img { margin-top: 20px; max-width: 90%; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+</style>
 </head>
 <body>
-  <h1>Flux Image Generator</h1>
-  <input type="text" id="prompt" placeholder="Enter your prompt..." />
-  <button id="generateBtn">Generate</button>
-  <div id="status"></div>
-  <div id="result"></div>
 
-  <script>
-    const button = document.getElementById("generateBtn");
-    const input = document.getElementById("prompt");
-    const status = document.getElementById("status");
-    const result = document.getElementById("result");
+<h1>Flux Image Generator</h1>
+<input type="text" id="prompt" placeholder="Enter your prompt..." />
+<button id="generateBtn">Generate</button>
+<div id="status"></div>
+<div id="result"></div>
 
-    button.addEventListener("click", async () => {
-      const prompt = input.value.trim();
-      if (!prompt) {
-        alert("Please enter a prompt!");
-        return;
-      }
+<script>
+const button = document.getElementById("generateBtn");
+const input = document.getElementById("prompt");
+const status = document.getElementById("status");
+const result = document.getElementById("result");
 
-      status.textContent = "⏳ Generating your image...";
+button.addEventListener("click", async () => {
+  const prompt = input.value.trim();
+  if (!prompt) {
+    alert("Please enter a prompt!");
+    return;
+  }
+
+  status.textContent = "⏳ Generating your image...";
+  result.innerHTML = "";
+  button.disabled = true;
+
+  try {
+    // Construct the API URL
+    const apiUrl = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(prompt)}&model=flux`;
+
+    // Set the image src directly
+    const img = new Image();
+    img.onload = () => {
       result.innerHTML = "";
-      button.disabled = true;
+      result.appendChild(img);
+      status.textContent = "✅ Generation complete!";
+      button.disabled = false;
+    };
+    img.onerror = () => {
+      status.textContent = "❌ Failed to generate image.";
+      button.disabled = false;
+    };
+    img.src = apiUrl;
 
-      try {
-        const response = await fetch(`/api/proxy?prompt=${encodeURIComponent(prompt)}`);
-        const data = await response.json();
+  } catch (err) {
+    status.textContent = `❌ ${err.message}`;
+    button.disabled = false;
+  }
+});
+</script>
 
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        // The API returns the image URL or Base64 in `data`. Adjust accordingly:
-        // Example: assume it returns { "url": "https://..." }
-        const imageUrl = data.url || ""; 
-
-        if (!imageUrl) throw new Error("No image returned from API");
-
-        result.innerHTML = `<img src="${imageUrl}" alt="Generated Image" />`;
-        status.textContent = "✅ Generation complete!";
-      } catch (e) {
-        status.textContent = `❌ ${e.message}`;
-      } finally {
-        button.disabled = false;
-      }
-    });
-  </script>
 </body>
 </html>
