@@ -7,9 +7,8 @@
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
   input { width: 300px; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
-  button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; }
+  button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; margin: 5px; }
   button:disabled { background-color: #ccc; cursor: not-allowed; }
-  #status { margin-top: 20px; font-style: italic; }
   img { margin-top: 20px; max-width: 90%; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
 </style>
 </head>
@@ -17,50 +16,77 @@
 
 <h1>Flux Image Generator</h1>
 <input type="text" id="prompt" placeholder="Enter your prompt..." />
+<br>
 <button id="generateBtn">Generate</button>
-<div id="status"></div>
+<button id="regenerateBtn" disabled>Regenerate</button>
+<button id="downloadBtn" disabled>Download</button>
 <div id="result"></div>
 
 <script>
-const button = document.getElementById("generateBtn");
-const input = document.getElementById("prompt");
-const status = document.getElementById("status");
+const promptInput = document.getElementById("prompt");
+const generateBtn = document.getElementById("generateBtn");
+const regenerateBtn = document.getElementById("regenerateBtn");
+const downloadBtn = document.getElementById("downloadBtn");
 const result = document.getElementById("result");
 
-button.addEventListener("click", async () => {
-  const prompt = input.value.trim();
-  if (!prompt) {
-    alert("Please enter a prompt!");
-    return;
-  }
+let currentPrompt = "";
+let currentImg = null;
 
-  status.textContent = "⏳ Generating your image...";
-  result.innerHTML = "";
-  button.disabled = true;
+// Function to generate image
+function generateImage(prompt) {
+  currentPrompt = prompt;
 
-  try {
-    // Construct the API URL
-    const apiUrl = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(prompt)}&model=flux`;
+  const img = new Image();
 
-    // Set the image src directly
-    const img = new Image();
-    img.onload = () => {
-      result.innerHTML = "";
-      result.appendChild(img);
-      status.textContent = "✅ Generation complete!";
-      button.disabled = false;
-    };
-    img.onerror = () => {
-      status.textContent = "❌ Failed to generate image.";
-      button.disabled = false;
-    };
-    img.src = apiUrl;
+  // Add a random param to force a new image
+  const apiUrl = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(prompt)}&model=flux&rand=${Date.now()}`;
 
-  } catch (err) {
-    status.textContent = `❌ ${err.message}`;
-    button.disabled = false;
-  }
+  img.crossOrigin = "anonymous"; // Needed for download
+  img.src = apiUrl;
+  
+  img.onload = () => {
+    result.innerHTML = "";
+    result.appendChild(img);
+    currentImg = img;
+    regenerateBtn.disabled = false;
+    downloadBtn.disabled = false;
+  };
+  
+  img.onerror = () => {
+    alert("❌ Failed to generate image.");
+  };
+}
+
+// Function to download current image
+function downloadImage() {
+  if (!currentImg) return;
+
+  // Create an invisible link element
+  const link = document.createElement("a");
+  link.href = currentImg.src;
+  link.download = `${currentPrompt.replace(/\s+/g, "_")}_${Date.now()}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Generate button click
+generateBtn.addEventListener("click", () => {
+  const prompt = promptInput.value.trim();
+  if (!prompt) return alert("Please enter a prompt!");
+  generateImage(prompt);
 });
+
+// Regenerate button click
+regenerateBtn.addEventListener("click", () => {
+  if (!currentPrompt || !currentImg) return;
+
+  currentImg.src = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(currentPrompt)}&model=flux&rand=${Date.now()}`;
+});
+
+// Download button click
+downloadBtn.addEventListener("click", downloadImage);
+
 </script>
 
 </body>
