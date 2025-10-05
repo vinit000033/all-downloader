@@ -5,40 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flux Image Generator</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    input {
-      width: 300px;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      background-color: #0088cc;
-      color: white;
-      cursor: pointer;
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #status {
-      margin-top: 20px;
-      font-style: italic;
-    }
-    img {
-      margin-top: 20px;
-      max-width: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input { width: 300px; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    #status { margin-top: 20px; font-style: italic; }
+    img { margin-top: 20px; max-width: 90%; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -67,12 +39,19 @@
 
       try {
         const response = await fetch(`/api/proxy?prompt=${encodeURIComponent(prompt)}`);
-        if (!response.ok) throw new Error("Failed to generate image.");
+        const data = await response.json();
 
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
+        if (data.error) {
+          throw new Error(data.error);
+        }
 
-        result.innerHTML = `<img src="${url}" alt="Generated Image" />`;
+        // The API returns the image URL or Base64 in `data`. Adjust accordingly:
+        // Example: assume it returns { "url": "https://..." }
+        const imageUrl = data.url || ""; 
+
+        if (!imageUrl) throw new Error("No image returned from API");
+
+        result.innerHTML = `<img src="${imageUrl}" alt="Generated Image" />`;
         status.textContent = "✅ Generation complete!";
       } catch (e) {
         status.textContent = `❌ ${e.message}`;
