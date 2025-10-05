@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flux Image Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #0088cc;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 20px;
+      font-style: italic;
+    }
+    img {
+      margin-top: 20px;
+      max-width: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>Flux Image Generator</h1>
+  <input type="text" id="prompt" placeholder="Enter your prompt..." />
+  <button id="generateBtn">Generate</button>
+  <div id="status"></div>
+  <div id="result"></div>
+
+  <script>
+    const button = document.getElementById("generateBtn");
+    const input = document.getElementById("prompt");
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    button.addEventListener("click", async () => {
+      const prompt = input.value.trim();
+      if (!prompt) {
+        alert("Please enter a prompt!");
+        return;
+      }
+
+      status.textContent = "⏳ Generating your image...";
+      result.innerHTML = "";
+      button.disabled = true;
+
+      try {
+        const response = await fetch(`/api/proxy?prompt=${encodeURIComponent(prompt)}`);
+        if (!response.ok) throw new Error("Failed to generate image.");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        result.innerHTML = `<img src="${url}" alt="Generated Image" />`;
+        status.textContent = "✅ Generation complete!";
+      } catch (e) {
+        status.textContent = `❌ ${e.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
