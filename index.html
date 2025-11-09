@@ -1,93 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flux Image Generator</title>
-<style>
-  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-  input { width: 300px; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
-  button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #0088cc; color: white; cursor: pointer; margin: 5px; }
-  button:disabled { background-color: #ccc; cursor: not-allowed; }
-  img { margin-top: 20px; max-width: 90%; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edustream Update</title>
+  <style>
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#0d1117,#111827);
+      color:#fff;
+      font-family:Arial, sans-serif;
+      padding:20px;
+      text-align:center;
+    }
+    .logo-img{
+      width:90px;
+      height:90px;
+      object-fit:contain;
+      margin-top:30px;
+      animation:fadeIn 1.2s ease;
+    }
+    .title{
+      font-size:30px;
+      font-weight:700;
+      margin:10px 0 4px;
+    }
+    .sub{
+      color:#9ca3af;
+      margin-bottom:25px;
+    }
+    .card{
+      background:rgba(255,255,255,0.06);
+      padding:20px;
+      border-radius:16px;
+      max-width:430px;
+      margin:0 auto;
+      backdrop-filter:blur(10px);
+      animation:slideUp 0.8s ease;
+    }
+    ul{list-style:none;padding:0;margin:20px 0;text-align:left}
+    li{
+      padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    li:last-child{border-bottom:none}
+    .dot{
+      height:10px;
+      width:10px;
+      background:#2563eb;
+      border-radius:50%;
+    }
+    .btn{
+      display:block;
+      background:#2563eb;
+      color:#fff;
+      text-decoration:none;
+      padding:14px;
+      border-radius:12px;
+      margin-top:20px;
+      font-size:16px;
+      font-weight:600;
+      transition:0.25s;
+    }
+    .btn:hover{
+      background:#1d4ed8;
+      transform:scale(1.03);
+    }
+    .brand{
+      margin-top:35px;
+      font-size:13px;
+      color:#9ca3af;
+      animation:fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes slideUp{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+  </style>
 </head>
 <body>
 
-<h1>Flux Image Generator</h1>
-<input type="text" id="prompt" placeholder="Enter your prompt..." />
-<br>
-<button id="generateBtn">Generate</button>
-<button id="regenerateBtn" disabled>Regenerate</button>
-<button id="downloadBtn" disabled>Download</button>
-<div id="result"></div>
+  <img src="https://ar-hosting.pages.dev/1762712685637.jpg" alt="Edustream Logo" class="logo-img" />
+  <div class="title">Edustream</div>
+  <div class="sub">Powered by Verzion</div>
 
-<script>
-const promptInput = document.getElementById("prompt");
-const generateBtn = document.getElementById("generateBtn");
-const regenerateBtn = document.getElementById("regenerateBtn");
-const downloadBtn = document.getElementById("downloadBtn");
-const result = document.getElementById("result");
+  <div class="card">
+    <h2 style="margin:0 0 10px">What’s New</h2>
+    <ul>
+      <li><div class="dot"></div> Improved performance</li>
+      <li><div class="dot"></div> Faster & smoother experience</li>
+      <li><div class="dot"></div> Enhanced security</li>
+      <li><div class="dot"></div> Updated logo & branding</li>
+    </ul>
 
-let currentPrompt = "";
-let currentImg = null;
+    <a href="https://file-to-link-bot.favon16815.workers.dev/?file=GZDXQ2DJKEZXU2RSKBJU4M2KOCESIUQ" class="btn" download>Download Update</a>
+  </div>
 
-// Function to generate image
-function generateImage(prompt) {
-  currentPrompt = prompt;
-
-  const img = new Image();
-
-  // Add a random param to force a new image
-  const apiUrl = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(prompt)}&model=flux&rand=${Date.now()}`;
-
-  img.crossOrigin = "anonymous"; // Needed for download
-  img.src = apiUrl;
-  
-  img.onload = () => {
-    result.innerHTML = "";
-    result.appendChild(img);
-    currentImg = img;
-    regenerateBtn.disabled = false;
-    downloadBtn.disabled = false;
-  };
-  
-  img.onerror = () => {
-    alert("❌ Failed to generate image.");
-  };
-}
-
-// Function to download current image
-function downloadImage() {
-  if (!currentImg) return;
-
-  // Create an invisible link element
-  const link = document.createElement("a");
-  link.href = currentImg.src;
-  link.download = `${currentPrompt.replace(/\s+/g, "_")}_${Date.now()}.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-// Generate button click
-generateBtn.addEventListener("click", () => {
-  const prompt = promptInput.value.trim();
-  if (!prompt) return alert("Please enter a prompt!");
-  generateImage(prompt);
-});
-
-// Regenerate button click
-regenerateBtn.addEventListener("click", () => {
-  if (!currentPrompt || !currentImg) return;
-
-  currentImg.src = `https://text2img.hideme.eu.org/image?prompt=${encodeURIComponent(currentPrompt)}&model=flux&rand=${Date.now()}`;
-});
-
-// Download button click
-downloadBtn.addEventListener("click", downloadImage);
-
-</script>
+  <div class="brand">© Verzion • Edustream</div>
 
 </body>
 </html>
